@@ -14,38 +14,49 @@ public class GA {
     int minInterval = 240;
     int maxInterval = 720;
     float init_produksi[] = new float[init_produksi_count];
-    ArrayList<Model> agent = new ArrayList<>();
-    ArrayList<Model> agentSorted = new ArrayList<>();
-    ArrayList<Model> agentTemp = new ArrayList<>();
-    ArrayList<Model> newAgent = new ArrayList<>();
+    List<Model> agent = new ArrayList<>();
+    List<Model> agentSorted = new ArrayList<>();
+    List<Model> agentTemp = new ArrayList<>();
+    List<Model> newAgent = new ArrayList<>();
 
     //Permintaan dari minggu ke - 1 sampai minggu ke - 8
     int permintaan[] = {
             342, 405, 563, 484, 313, 435, 462, 411
     };
     public static void main(String[] args) {
+        int count=0;
         GA geneticAlgorithm = new GA();
-        geneticAlgorithm.init_agents(geneticAlgorithm.init_produksi_count);
-        geneticAlgorithm.calculateFitness();
-        geneticAlgorithm.selection();
-        geneticAlgorithm.crossover();
+        geneticAlgorithm.agent = geneticAlgorithm.init_agents(geneticAlgorithm.agent,geneticAlgorithm.init_produksi_count);
+        geneticAlgorithm.calculateFitness(geneticAlgorithm.agent);
+
+//        while (count<geneticAlgorithm.generations){
+        if(geneticAlgorithm.newAgent.isEmpty()){
+            geneticAlgorithm.agentTemp = geneticAlgorithm.selection(geneticAlgorithm.agent,geneticAlgorithm.agentTemp);
+        }else {
+            geneticAlgorithm.agentTemp = geneticAlgorithm.selection(geneticAlgorithm.newAgent,geneticAlgorithm.agentTemp);
+        }
+        geneticAlgorithm.newAgent = geneticAlgorithm.crossover(geneticAlgorithm.newAgent,geneticAlgorithm.agentTemp);
+//            geneticAlgorithm.mutation(geneticAlgorithm.newAgent);
+//            count++;
+//        }
+
 
 //        System.out.print("New Child :");
 //        for (int i = 0; i< geneticAlgorithm.popSize;i++){
 //            geneticAlgorithm.newAgent.add(new Model(geneticAlgorithm.init_produksi_count,0,geneticAlgorithm.crossover()));
 //        }
 
-        for (int i = 0; i< geneticAlgorithm.popSize;i++){
-            for(int j = 0; j < geneticAlgorithm.init_produksi_count;j++){
-                System.out.print("New Agent : " + geneticAlgorithm.newAgent.get(i).agent[j]);
-            }
-            System.out.println("\n");
-        }
+//        for (int i = 0; i< geneticAlgorithm.popSize;i++){
+//            for(int j = 0; j < geneticAlgorithm.init_produksi_count;j++){
+//                System.out.print("New Agent : " + geneticAlgorithm.newAgent.get(i).agent[j]);
+//            }
+//            System.out.println("\n");
+//        }
 
     }
 
     //inisialisasi nilai random terlebih dahulu
-    void init_agents(int init_produksi_count){
+    List<Model> init_agents(List<Model> agent, int init_produksi_count){
         int flag = 0;
         do {
             int genes[] = new int[init_produksi_count];
@@ -63,17 +74,17 @@ public class GA {
 
         System.out.println("List Size :" + agent.size());
 
+        return agent;
     }
 
     //Kalkulasi fitness tiap agent
-    void calculateFitness(){
+    void calculateFitness(List<Model> agent){
         double biayaSimpan;
         double biayaLembur;
         double kerugian;
         int persediaan;
         int c = 100000;
         double totalBiaya;
-
 
         for (int i = 0; i<agent.size();i++){
             totalBiaya = 0;
@@ -105,7 +116,7 @@ public class GA {
 
     }
 
-    void selection(){
+    List<Model> selection(List<Model> agent,List<Model> agentTemp){
         agent.sort(Comparator.comparing(Model::getFitness).reversed());
 
         System.out.println("SIZE AGENT : " + agent.size());
@@ -126,9 +137,11 @@ public class GA {
             }
             System.out.println("\n" + "Fitness : " +agentTemp.get(i).fitness);
         }
+
+        return agentTemp;
     }
 
-    void crossover() {
+    List<Model> crossover(List<Model> newAgent,List<Model> agentTemp) {
         //Masukin seluruh parentnya di the best
         newAgent.addAll(agentTemp);
 
@@ -189,7 +202,9 @@ public class GA {
             }
 
         }
-        System.out.println("SIZE AGENT BARU : " + newAgent.size());
+        System.out.println("\nSIZE AGENT BARU : " + newAgent.size());
+
+        return newAgent;
     }
 
 //    int[] crossover(){
@@ -269,24 +284,27 @@ public class GA {
 //        return child;
 //    }
 
-    void mutation(){
-        Random rn = new Random(8);
-        Random rn2 = new Random(16);
+    ArrayList<Model> mutation(ArrayList<Model> newAgent){
+        //SWAP MUTATION
+        Random rn = new Random();
         //Select a random mutation point
-        int mutationPoint = getRandomNumberInRange_Seed(rn,0,7);
-        int mutationPoint2 = getRandomNumberInRange_Seed(rn,0,7);
+        int mutationPoint = getRandomNumberInRange_Seed(rn,0,newAgent.get(0).agent_length);
+        int mutationPoint2 = getRandomNumberInRange_Seed(rn,0,newAgent.get(0).agent_length);
+        int split = getRandomNumberInRange(0,newAgent.size());
 
-        int temp = agentTemp.get(0).agent[mutationPoint];
-        agentTemp.get(0).agent[mutationPoint] = agentTemp.get(0).agent[mutationPoint2];
-        agentTemp.get(0).agent[mutationPoint2] = temp;
+        int temp = newAgent.get(split).agent[mutationPoint];
+        newAgent.get(split).agent[mutationPoint] = newAgent.get(split).agent[mutationPoint2];
+        newAgent.get(split).agent[mutationPoint2] = temp;
 
-        mutationPoint = getRandomNumberInRange_Seed(rn2,0,7);
-        mutationPoint2 = getRandomNumberInRange_Seed(rn2,0,7);
 
-        temp = agentTemp.get(1).agent[mutationPoint];
-        agentTemp.get(1).agent[mutationPoint] = agentTemp.get(1).agent[mutationPoint2];
-        agentTemp.get(1).agent[mutationPoint2] = temp;
+//        mutationPoint = getRandomNumberInRange_Seed(rn2,0,7);
+//        mutationPoint2 = getRandomNumberInRange_Seed(rn2,0,7);
+//
+//        temp = newAgent.get(1).agent[mutationPoint];
+//        newAgent.get(1).agent[mutationPoint] = newAgent.get(1).agent[mutationPoint2];
+//        newAgent.get(1).agent[mutationPoint2] = temp;
 
+        return newAgent;
     }
 
     private static int getRandomNumberInRange(int min, int max) {
