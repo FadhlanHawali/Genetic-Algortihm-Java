@@ -3,11 +3,21 @@ public class Model {
     int agent_length;
     double fitness;
     int agent[];
+    double totalKerugian;
 
-    public Model(int agent_length, double fitness, int[] agent) {
+    public Model(int agent_length, double fitness, int[] agent, double totalKerugian) {
         this.agent_length = agent_length;
         this.fitness = fitness;
         this.agent = agent;
+        this.totalKerugian = totalKerugian;
+    }
+
+    public double getTotalKerugian() {
+        return totalKerugian;
+    }
+
+    public void setTotalKerugian(double totalKerugian) {
+        this.totalKerugian = totalKerugian;
     }
 
     public int getAgent_length() {

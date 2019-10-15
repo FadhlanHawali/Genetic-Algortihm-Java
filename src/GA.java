@@ -8,8 +8,8 @@ public class GA {
 
     Population population = new Population();
 
-    int popSize = 30;
-    int generations = 5;
+    int popSize = 10;
+    int generations = 2;
     int init_produksi_count = 8;
     int minInterval = 240;
     int maxInterval = 720;
@@ -27,37 +27,37 @@ public class GA {
         int count=0;
         GA geneticAlgorithm = new GA();
 
+
         geneticAlgorithm.agent = geneticAlgorithm.init_agents(geneticAlgorithm.agent,geneticAlgorithm.init_produksi_count);
         geneticAlgorithm.calculateFitness(geneticAlgorithm.agent);
+        geneticAlgorithm.printAgent(geneticAlgorithm.agent,count);
         while (count<geneticAlgorithm.generations){
             if(geneticAlgorithm.newAgent.isEmpty()){
-                System.out.println("BESAR POPULASI FLAG 1: " + geneticAlgorithm.agent.size());
                 geneticAlgorithm.agentTemp = geneticAlgorithm.selection(geneticAlgorithm.agent,geneticAlgorithm.agentTemp);
              }else {
                 geneticAlgorithm.agentTemp = geneticAlgorithm.selection(geneticAlgorithm.newAgent,geneticAlgorithm.agentTemp);
-                System.out.println("BESAR POPULASI FLAG 1 - NEW AGENT TEMP: " + geneticAlgorithm.agentTemp.size());
           }
             geneticAlgorithm.newAgent = geneticAlgorithm.crossover(geneticAlgorithm.newAgent,geneticAlgorithm.agentTemp);
             geneticAlgorithm.newAgent = geneticAlgorithm.mutation(geneticAlgorithm.newAgent);
             geneticAlgorithm.calculateFitness(geneticAlgorithm.newAgent);
-            System.out.println("BESAR POPULASI FLAG 2: " + geneticAlgorithm.newAgent.size() + "\n");
             geneticAlgorithm.agentTemp.clear();
-            System.out.println("CHECK SIZE AGENT TEMPORARY: " + geneticAlgorithm.agentTemp.size() + "\n");
             count++;
+            geneticAlgorithm.printAgent(geneticAlgorithm.newAgent,count);
         }
 
+    }
 
-//        System.out.print("New Child :");
-//        for (int i = 0; i< geneticAlgorithm.popSize;i++){
-//            geneticAlgorithm.newAgent.add(new Model(geneticAlgorithm.init_produksi_count,0,geneticAlgorithm.crossover()));
-//        }
-
-//        for (int i = 0; i< geneticAlgorithm.popSize;i++){
-//            for(int j = 0; j < geneticAlgorithm.init_produksi_count;j++){
-//                System.out.print("New Agent : " + geneticAlgorithm.newAgent.get(i).agent[j]);
-//            }
-//            System.out.println("\n");
-//        }
+    void printAgent(List<Model> agent, int generations){
+        System.out.println("\n\nGenerasi ke - " + generations);
+        for(int i = 0;i<agent.size();i++){
+            System.out.println("\nFitness : " + agent.get(i).fitness);
+            System.out.println("\nTotal Biaya : " + agent.get(i).totalKerugian);
+            System.out.println("Agent : ");
+            for (int j = 0; j<agent.get(i).agent.length;j++) {
+                System.out.print(agent.get(i).agent[j] + " ");
+            }
+            System.out.println("\n");
+        }
 
     }
 
@@ -70,7 +70,7 @@ public class GA {
                 genes[i] = getRandomNumberInRange(minInterval,maxInterval);
                 System.out.print(genes[i] + " ");
             }
-            agent.add(new Model(init_produksi_count,0,genes));
+            agent.add(new Model(init_produksi_count,0,genes,0));
 
 
             flag++;
@@ -116,6 +116,7 @@ public class GA {
                 totalBiaya = totalBiaya + biayaLembur + biayaSimpan + kerugian;
             }
 //            System.out.println("Total Biaya : " + totalBiaya);
+            agent.get(i).setTotalKerugian(totalBiaya);
             agent.get(i).setFitness(c/totalBiaya);
 //            System.out.println("Fitness agent ke-" + i + ": " +agent.get(i).getFitness());
         }
@@ -126,30 +127,33 @@ public class GA {
         agent.sort(Comparator.comparing(Model::getFitness).reversed());
 
         System.out.println("SIZE AGENT : " + agent.size());
-        for (int i = 0;i < agent.size();i++){
-            System.out.println("Fitness Sorted: " + agent.get(i).fitness);
-        }
+//        for (int i = 0;i < agent.size();i++){
+//            System.out.println("Fitness Sorted: " + agent.get(i).fitness);
+//        }
 
-        System.out.println("Yang TERAMBIL UNTUK JADI PARENT : ");
+//        System.out.println("Yang TERAMBIL UNTUK JADI PARENT : ");
         //Select the best gene in the population
         for (int i = 0; i< Math.floor(0.2 * agent.size());i++){
-            agentTemp.add(new Model(agent.get(i).agent_length,agent.get(i).getFitness(),agent.get(i).agent));
+            agentTemp.add(new Model(agent.get(i).agent_length,agent.get(i).getFitness(),agent.get(i).agent,agent.get(i).totalKerugian));
         }
-        for (int i = 0;i<agentTemp.size();i++){
-            for (int j = 0;j<agentTemp.get(i).agent_length;j++){
-                System.out.print(agentTemp.get(i).agent[j] + " ");
-
-            }
-            System.out.println("\n" + "Fitness : " +agentTemp.get(i).fitness);
-        }
+//        for (int i = 0;i<agentTemp.size();i++){
+//            for (int j = 0;j<agentTemp.get(i).agent_length;j++){
+//                System.out.print(agentTemp.get(i).agent[j] + " ");
+//
+//            }
+//            System.out.println("\n" + "Fitness : " +agentTemp.get(i).fitness);
+//        }
 
         return agentTemp;
     }
 
     List<Model> crossover(List<Model> newAgent,List<Model> agentTemp) {
         //Masukin seluruh parentnya di the best
+        if(!newAgent.isEmpty()){
+            newAgent.clear();
+        }
         newAgent.addAll(agentTemp);
-        System.out.println("NEW AGENT INITIAL SIZE : " + newAgent.size());
+//        System.out.println("NEW AGENT INITIAL SIZE : " + newAgent.size());
 
         for (int i = 0; i<(popSize-agentTemp.size())/2;i++){
 
@@ -162,7 +166,7 @@ public class GA {
             int parent2[] = agentTemp.get(r2).agent;
             //Cari Batas Split
             int split = getRandomNumberInRange(1,agentTemp.get(0).agent_length-1);
-            System.out.println("\n BATAS SPLIT NYA : " + split);
+//            System.out.println("\n BATAS SPLIT NYA : " + split);
             int[] child1 = new int[agentTemp.get(0).agent.length];
             int[] child2 = new int[agentTemp.get(0).agent.length];
 
@@ -195,8 +199,8 @@ public class GA {
             System.arraycopy(temp1,0,child2,0,temp1.length);
             System.arraycopy(temp2,0,child2,temp1.length,temp2.length);
 
-            newAgent.add(new Model(temp1.length,0,child1));
-            newAgent.add(new Model(temp2.length,0,child2));
+            newAgent.add(new Model(temp1.length,0,child1,0));
+            newAgent.add(new Model(temp2.length,0,child2,0));
 
 //            System.out.println("\nANAK KE-1 : ");
 //            for (int j = 0;j<child1.length;j++){
@@ -208,7 +212,7 @@ public class GA {
 //            }
 
         }
-        System.out.println("\nSIZE AGENT BARU : " + newAgent.size());
+//        System.out.println("\nSIZE AGENT BARU : " + newAgent.size());
 
         return newAgent;
     }
@@ -291,6 +295,7 @@ public class GA {
 //    }
 
     List<Model> mutation(List<Model> newAgent){
+        /**
         //SWAP MUTATION
         Random rn = new Random();
         //Select a random mutation point
@@ -301,6 +306,37 @@ public class GA {
         int temp = newAgent.get(split).agent[mutationPoint];
         newAgent.get(split).agent[mutationPoint] = newAgent.get(split).agent[mutationPoint2];
         newAgent.get(split).agent[mutationPoint2] = temp;
+
+        **/
+        /**
+        //RANDOM VALUE MUTATION
+        Random rn = new Random();
+        int randomValue = getRandomNumberInRange(minInterval,maxInterval);
+        int split = getRandomNumberInRange(0,newAgent.size());
+        int mutationPoint = getRandomNumberInRange(0,newAgent.get(0).agent_length-1);
+
+        System.out.println("BEFORE MUTATION : ");
+        for (int i = 0; i< newAgent.get(split).agent.length;i++){
+            System.out.print(newAgent.get(split).agent[i] + " ");
+        }
+        System.out.println("\n");
+        newAgent.get(split).agent[mutationPoint] = randomValue;
+
+        System.out.println("After MUTATION : ");
+        for (int i = 0; i< newAgent.get(split).agent.length;i++){
+            System.out.print(newAgent.get(split).agent[i] + " ");
+        }
+         **/
+
+        //ALL MUTATION
+
+        int randomValue = getRandomNumberInRange(minInterval,maxInterval);
+        int mutationPoint = getRandomNumberInRange(0,newAgent.get(0).agent_length-1);
+
+        for(int i = 0;i<newAgent.size();i++){
+            newAgent.get(i).agent[mutationPoint] = randomValue;
+        }
+        System.out.println("\n");
 
 
 //        mutationPoint = getRandomNumberInRange_Seed(rn2,0,7);
