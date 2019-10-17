@@ -8,8 +8,8 @@ public class GA {
 
     Population population = new Population();
 
-    int popSize = 10;
-    int generations = 2;
+    int popSize = 100;
+    int generations = 500;
     int init_produksi_count = 8;
     int minInterval = 240;
     int maxInterval = 720;
@@ -125,24 +125,14 @@ public class GA {
 
     List<Model> selection(List<Model> agent,List<Model> agentTemp){
         agent.sort(Comparator.comparing(Model::getFitness).reversed());
-
-        System.out.println("SIZE AGENT : " + agent.size());
-//        for (int i = 0;i < agent.size();i++){
-//            System.out.println("Fitness Sorted: " + agent.get(i).fitness);
-//        }
-
-//        System.out.println("Yang TERAMBIL UNTUK JADI PARENT : ");
         //Select the best gene in the population
         for (int i = 0; i< Math.floor(0.2 * agent.size());i++){
-            agentTemp.add(new Model(agent.get(i).agent_length,agent.get(i).getFitness(),agent.get(i).agent,agent.get(i).totalKerugian));
+            agentTemp.add(new Model(
+                    agent.get(i).agent_length,
+                    agent.get(i).getFitness(),agent.get(i).agent,
+                    agent.get(i).totalKerugian));
         }
-//        for (int i = 0;i<agentTemp.size();i++){
-//            for (int j = 0;j<agentTemp.get(i).agent_length;j++){
-//                System.out.print(agentTemp.get(i).agent[j] + " ");
-//
-//            }
-//            System.out.println("\n" + "Fitness : " +agentTemp.get(i).fitness);
-//        }
+
 
         return agentTemp;
     }
@@ -339,12 +329,6 @@ public class GA {
         System.out.println("\n");
 
 
-//        mutationPoint = getRandomNumberInRange_Seed(rn2,0,7);
-//        mutationPoint2 = getRandomNumberInRange_Seed(rn2,0,7);
-//
-//        temp = newAgent.get(1).agent[mutationPoint];
-//        newAgent.get(1).agent[mutationPoint] = newAgent.get(1).agent[mutationPoint2];
-//        newAgent.get(1).agent[mutationPoint2] = temp;
 
         return newAgent;
     }
